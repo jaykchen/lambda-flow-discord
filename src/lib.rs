@@ -1,4 +1,4 @@
-use airtable_flows::create_record;
+// use airtable_flows::create_record;
 use http_req::{
     request::{Method, Request},
     uri::Uri,
@@ -13,44 +13,37 @@ pub fn run() {
         if let Some(code) = qry.get("code") {
             send_message_to_channel("ik8", "general", code.to_string());
 
-            // if let Some(code) = code.as_str() {
-            //     let at = get_access_token(
-            //         [
-            //             ("grant_type", "authorization_code"),
-            //             ("code", &code),
-            //             ("redirect_uri", REDIRECT_URL.as_str()),
-            //         ]
-            //         .into_iter(),
-            //     )
-            //     .await
-            //     .map_err(|e| (StatusCode::UNAUTHORIZED, e))?;
+            if let Some(code) = code.as_str() {
+                if let Some(token) = get_access(code) {
+                    send_message_to_channel("ik8", "general", token.to_string());
+                }
 
-            //         if let Some(user) =     get_authed_user(&at.access_token)
-            //         .await
-            //         .map(|user| {
-            //             let location = format!(
-            //                 "{}/api/connected?authorId={}&authorName={}&authorState={}&refreshState={}",
-            //                 HAIKU_API_PREFIX.as_str(),
-            //                 user.id,
-            //                 user.username,
-            //                 encrypt(&at.access_token),
-            //                 encrypt(&at.refresh_token)
-            //             );
+                // if let Some(user) =     get_authed_user(&at.access_token)
+                // .await
+                // .map(|user| {
+                //     let location = format!(
+                //         "{}/api/connected?authorId={}&authorName={}&authorState={}&refreshState={}",
+                //         HAIKU_API_PREFIX.as_str(),
+                //         user.id,
+                //         user.username,
+                //         encrypt(&at.access_token),
+                //         encrypt(&at.refresh_token)
+                //     );
 
-            //             (StatusCode::FOUND, [("Location", location)])
-            //         })
-            //         .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e)) {
-            //             let record = serde_json::json!({
-            //                 "Login": user["login"],
-            //                 "Name": user["name"],
-            //                 "Email": user["email"],
-            //                 "Location": user["location"],
-            //                 "Created At": user["created_at"]
-            //             });
-            //             create_record("jaykchen", "appButiJsqQBEjzVV", "ghgh", record.clone());
-            //             send_message_to_channel("ik8", "general", user["blog"].to_string());
-            //         }
-            // }
+                //     (StatusCode::FOUND, [("Location", location)])
+                // })
+                // .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e)) {
+                //     let record = serde_json::json!({
+                //         "Login": user["login"],
+                //         "Name": user["name"],
+                //         "Email": user["email"],
+                //         "Location": user["location"],
+                //         "Created At": user["created_at"]
+                //     });
+                //     create_record("jaykchen", "appButiJsqQBEjzVV", "ghgh", record.clone());
+                //     send_message_to_channel("ik8", "general", user["blog"].to_string());
+                // }
+            }
         }
 
         send_response(
