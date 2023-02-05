@@ -61,9 +61,6 @@ pub fn run() {
     });
 }
 
-static DISCORD_APP_CLIENT_ID: &str = "1062171154976100392";
-static DISCORD_PUBLIC_KEY: &str =
-    "10792ca4f4fe1fc1ce3848aae7e7e90236ccd829417eb35cda0a24bb3ab1999f";
 static REDIRECT_URL: &str = "http://127.0.0.1:9000/";
 // static REDIRECT_URL: &str = "https://code.flows.network/lambda/qspd8Z8TpU";
 static SCOPES: &str = "applications.commands";
@@ -71,8 +68,8 @@ static SCOPES: &str = "applications.commands";
 fn get_access(code: &str) -> Option<String> {
     let uri = Uri::try_from("https://discord.com/api/oauth2/token").unwrap();
     let params = serde_json::json!({
-        "client_id": DISCORD_APP_CLIENT_ID,
-        "client_secret": DISCORD_PUBLIC_KEY,
+        "client_id": std::env::var("DISCORD_APP_CLIENT_ID").unwrap(),
+        "client_secret": std::env::var("DISCORD_APP_CLIENT_SECRET").unwrap(),
         "code": code,
     });
     let params = serde_json::to_string(&params).unwrap();
