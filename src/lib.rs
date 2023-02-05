@@ -60,3 +60,61 @@ pub fn run() {
         );
     });
 }
+
+static DISCORD_APP_CLIENT_ID: &str = "1062171154976100392";
+static DISCORD_PUBLIC_KEY: &str =
+    "10792ca4f4fe1fc1ce3848aae7e7e90236ccd829417eb35cda0a24bb3ab1999f";
+static REDIRECT_URL: &str = "http://127.0.0.1:9000/";
+// static REDIRECT_URL: &str = "https://code.flows.network/lambda/qspd8Z8TpU";
+static SCOPES: &str = "applications.commands";
+
+fn get_access(code: &str) -> Option<String> {
+    let uri = Uri::try_from("https://discord.com/api/oauth2/token").unwrap();
+    let params = serde_json::json!({
+        "client_id": DISCORD_APP_CLIENT_ID,
+        "client_secret": DISCORD_PUBLIC_KEY,
+        "code": code,
+    });
+    let params = serde_json::to_string(&params).unwrap();
+
+    let mut writer = Vec::new();
+    if let Ok(res) = Request::new(&uri)
+        .method(Method::POST)
+        .header("content-type", "application/x-www-form-urlencoded")
+        .header("accept", "application/x-www-form-urlencoded")
+        .header("content-length", &params.as_bytes().len())
+        .body(&params.as_bytes())
+        .send(&mut writer)
+    {
+        if res.status_code().is_success() {
+            if let Ok(res) = serde_json::from_slice::<Value>(&writer) {
+                if let Some(at) = res["access_token"].as_str() {
+                    return Some(at.to_string());
+                }
+            }
+        }
+    }
+
+    None
+}
+
+fn get_user(token: &str) -> Option<Value> {
+    let uri = Uri::try_from("https://api.github.com/user").unwrap();
+
+    let mut writer = Vec::new();
+    if let Ok(res) = Request::new(&uri)
+        .method(Method::GET)
+        .header("user-agent", "Flows.network function")
+        .header("authorization", &format!("Bearer {}", token))
+        .header("accept", "application/vnd.github+json")
+        .send(&mut writer)
+    {
+        if res.status_code().is_success() {
+            if let Ok(res) = serde_json::from_slice::<Value>(&writer) {
+                return Some(res);
+            }
+        }
+    }
+
+    None
+}
