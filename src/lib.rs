@@ -38,7 +38,7 @@ pub fn run() {
 }
 
 // static REDIRECT_URL: &str = "http://127.0.0.1:9000/";
-static REDIRECT_URL: &str = "https://code.flows.network/lambda/qspd8Z8TpU";
+// static REDIRECT_URL: &str = "https://code.flows.network/lambda/qspd8Z8TpU";
 // static SCOPES: &str = "applications.commands";
 
 fn get_access(code: &str) -> Option<String> {
@@ -49,7 +49,6 @@ fn get_access(code: &str) -> Option<String> {
         "code": code,
         "grant_type": "authorization_code",
         "scope": "identify email",
-        "redirect_uri": REDIRECT_URL,
     });
     let params = serde_json::to_string(&params).unwrap();
 
