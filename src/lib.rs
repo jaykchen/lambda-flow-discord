@@ -1,4 +1,3 @@
-// use airtable_flows::create_record;
 use http_req::{
     request::{Method, Request},
     uri::Uri,
@@ -23,7 +22,6 @@ pub fn run() {
                             "display_name": user["display_name"],
                             "email": user["email"],
                         });
-                        // create_record("jaykchen", "appButiJsqQBEjzVV", "ghgh", record.clone());
                         send_message_to_channel("ik8", "general", user["email"].to_string());
                     }
                 }
@@ -36,10 +34,6 @@ pub fn run() {
         }
     });
 }
-
-// static REDIRECT_URL: &str = "http://127.0.0.1:9000/";
-// static REDIRECT_URL: &str = "https://code.flows.network/lambda/qspd8Z8TpU";
-// static SCOPES: &str = "applications.commands";
 
 fn get_access(code: &str) -> Option<String> {
     let uri = Uri::try_from("https://discord.com/api/oauth2/token").unwrap();
