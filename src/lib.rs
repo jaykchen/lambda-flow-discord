@@ -16,47 +16,30 @@ pub fn run() {
             if let Some(code) = code.as_str() {
                 if let Some(token) = get_access(code) {
                     send_message_to_channel("ik8", "general", token.to_string());
+
+                    if let Some(user) = get_user(&token) {
+                        let record = serde_json::json!({
+                            "username": user["username"],
+                            "display_name": user["display_name"],
+                            "email": user["email"],
+                        });
+                        // create_record("jaykchen", "appButiJsqQBEjzVV", "ghgh", record.clone());
+                        send_message_to_channel("ik8", "general", user["email"].to_string());
+                    }
                 }
-
-                // if let Some(user) =     get_authed_user(&at.access_token)
-                // .await
-                // .map(|user| {
-                //     let location = format!(
-                //         "{}/api/connected?authorId={}&authorName={}&authorState={}&refreshState={}",
-                //         HAIKU_API_PREFIX.as_str(),
-                //         user.id,
-                //         user.username,
-                //         encrypt(&at.access_token),
-                //         encrypt(&at.refresh_token)
-                //     );
-
-                //     (StatusCode::FOUND, [("Location", location)])
-                // })
-                // .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e)) {
-                //     let record = serde_json::json!({
-                //         "Login": user["login"],
-                //         "Name": user["name"],
-                //         "Email": user["email"],
-                //         "Location": user["location"],
-                //         "Created At": user["created_at"]
-                //     });
-                //     create_record("jaykchen", "appButiJsqQBEjzVV", "ghgh", record.clone());
-                //     send_message_to_channel("ik8", "general", user["blog"].to_string());
-                // }
             }
+            send_response(
+                200,
+                vec![(String::from("content-type"), String::from("text/html"))],
+                "ok".as_bytes().to_vec(),
+            );
         }
-
-        send_response(
-            200,
-            vec![(String::from("content-type"), String::from("text/html"))],
-            "ok".as_bytes().to_vec(),
-        );
     });
 }
 
-static REDIRECT_URL: &str = "http://127.0.0.1:9000/";
-// static REDIRECT_URL: &str = "https://code.flows.network/lambda/qspd8Z8TpU";
-static SCOPES: &str = "applications.commands";
+// static REDIRECT_URL: &str = "http://127.0.0.1:9000/";
+static REDIRECT_URL: &str = "https://code.flows.network/lambda/qspd8Z8TpU";
+// static SCOPES: &str = "applications.commands";
 
 fn get_access(code: &str) -> Option<String> {
     let uri = Uri::try_from("https://discord.com/api/oauth2/token").unwrap();
@@ -64,6 +47,9 @@ fn get_access(code: &str) -> Option<String> {
         "client_id": std::env::var("DISCORD_APP_CLIENT_ID").unwrap(),
         "client_secret": std::env::var("DISCORD_APP_CLIENT_SECRET").unwrap(),
         "code": code,
+        "grant_type": "authorization_code",
+        "scope": "identify email",
+        "redirect_uri": REDIRECT_URL,
     });
     let params = serde_json::to_string(&params).unwrap();
 
@@ -71,7 +57,7 @@ fn get_access(code: &str) -> Option<String> {
     if let Ok(res) = Request::new(&uri)
         .method(Method::POST)
         .header("content-type", "application/x-www-form-urlencoded")
-        .header("accept", "application/x-www-form-urlencoded")
+        .header("accept", "application/json")
         .header("content-length", &params.as_bytes().len())
         .body(&params.as_bytes())
         .send(&mut writer)
@@ -89,14 +75,14 @@ fn get_access(code: &str) -> Option<String> {
 }
 
 fn get_user(token: &str) -> Option<Value> {
-    let uri = Uri::try_from("https://api.github.com/user").unwrap();
+    let uri = Uri::try_from("https://discord.com/api/users/@me").unwrap();
 
     let mut writer = Vec::new();
     if let Ok(res) = Request::new(&uri)
         .method(Method::GET)
         .header("user-agent", "Flows.network function")
         .header("authorization", &format!("Bearer {}", token))
-        .header("accept", "application/vnd.github+json")
+        .header("accept", "application/json")
         .send(&mut writer)
     {
         if res.status_code().is_success() {
