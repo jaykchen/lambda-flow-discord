@@ -10,7 +10,6 @@ path = "src/lib.rs"
 crate-type = ["cdylib"]
 
 [dependencies]
-airtable-flows = "0.1"
 http_req_wasi = "0.10"
 lambda-flows = "0.2"
 slack-flows = "0.2"
